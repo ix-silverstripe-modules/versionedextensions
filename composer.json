@@ -1,0 +1,27 @@
+{
+	"name" : "silverstripe-modules/versionedextensions",
+	"description" : "Extension for versioned has_many and many_many relationship.",
+	"type" : "silverstripe-module",
+	"keywords" : [
+		"silverstripe",
+		"versioned",
+		"has_many",
+		"many_many",
+		"versioning",
+		"extension"
+	],
+	"authors" : [{
+			"name" : "Guy Watson",
+			"email" : "guy.watson@internetrix.com.au"
+		}, {
+			"name" : "Jason Zhang",
+			"email" : "jason.zhang@internetrix.com.au"
+		}
+	],
+	"require" : {
+		"silverstripe/framework" : "~3.1"
+	},
+	"extra" : {
+		"installer-name" : "versionedextensions"
+	}
+}
