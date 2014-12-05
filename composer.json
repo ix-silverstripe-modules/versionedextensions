@@ -23,5 +23,6 @@
 	},
 	"extra" : {
 		"installer-name" : "versionedextensions"
-	}
+	},
+	"minimum-stability" : "dev"
 }
