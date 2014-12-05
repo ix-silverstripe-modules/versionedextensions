@@ -1,0 +1,6 @@
+---
+Name: versionedextensions
+---
+Page:
+  extensions:
+    - 'VersionedHasManyPageExtension'

@@ -40,17 +40,17 @@ Please add the following code to Page.php
 
 #### many_many
 
-Apply this extension to the dataobject which has Versioned extension (e.g. Page).
+Apply this extension to Page.
 
 	class Page extends SiteTree {
 		private static $many_many = array('Slides' => 'Slide');
 		
 		private static $extensions = array(
-			"VersionedMMDataObjectExtension"
+			"VersionedMMPageExtension"
 		);
 	}
 		
-Apply this extension to the dataobject which belongs to the above dataobject (e.g. Slide).
+Apply this extension to the dataobject which belongs to Page (e.g. Slide).
 
 	class Slide extends DataObject {
 		private static $belongs_many_many = array('Pages' => 'Page');
@@ -76,7 +76,7 @@ You have to add the following function in Page. This function is copied from Dat
 		
 		if(
 			Versioned::current_stage() == 'Live' 
-			&& $this->hasExtension('VersionedMMDataObjectExtension')
+			&& $this->hasExtension('VersionedMMPageExtension')
 			&& $componentClass::has_extension('VersionedMMBelongsDataObjectExtension')
 		){
 			$table .= '_Live';
