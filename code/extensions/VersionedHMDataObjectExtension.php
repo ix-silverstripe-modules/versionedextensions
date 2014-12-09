@@ -18,7 +18,7 @@ class VersionedHMDataObjectExtension extends DataExtension {
 		$has_many = $this->owner->config()->get('has_many');
 		if($has_many){
 			foreach($has_many as $key => $value){
-				if($value::has_extension('VersionDataObjectExtension')) {
+				if($value::has_extension('VersionedHMDataObjectExtension')) {
 					$relationship 	= $this->owner->getComponents($key);
 					$foreignKey 	= $relationship->getForeignKey();
 					$live = Versioned::get_by_stage($value, "Live", "\"$value\".\"$foreignKey\" = " . $this->owner->ID );
@@ -53,7 +53,7 @@ class VersionedHMDataObjectExtension extends DataExtension {
 		$has_many = $this->owner->config()->get('has_many');
 		if($has_many){
 			foreach($has_many as $key => $value){
-				if($value::has_extension('VersionDataObjectExtension')) {
+				if($value::has_extension('VersionedHMDataObjectExtension')) {
 					$relationship = $this->owner->getComponents($key);
 					if($relationship) {
 						foreach($relationship as $field) {
@@ -93,7 +93,7 @@ class VersionedHMDataObjectExtension extends DataExtension {
 			$has_many = $this->owner->config()->get('has_many');
 			if($has_many){
 				foreach($has_many as $key => $value){
-					if($value::has_extension('VersionDataObjectExtension')) {
+					if($value::has_extension('VersionedHMDataObjectExtension')) {
 						$relationship = $this->owner->getComponents($key);
 						if($relationship) {
 							foreach($relationship as $field) {
@@ -116,7 +116,7 @@ class VersionedHMDataObjectExtension extends DataExtension {
 		$has_many = $this->owner->config()->get('has_many');
 		if($has_many){
 			foreach($has_many as $key => $value){
-				if($value::has_extension('VersionDataObjectExtension')) {
+				if($value::has_extension('VersionedHMDataObjectExtension')) {
 					$relationship = $this->owner->getComponents($key);
 					if($relationship) {
 						foreach($relationship as $field) {
@@ -133,7 +133,7 @@ class VersionedHMDataObjectExtension extends DataExtension {
 		//move from live to staging
 		if($has_many){
 			foreach($has_many as $key => $value){
-				if($value::has_extension('VersionDataObjectExtension')) {
+				if($value::has_extension('VersionedHMDataObjectExtension')) {
 					$relationship = $this->owner->getComponents($key);
 					if($relationship) {
 						foreach($relationship as $field) {
@@ -154,7 +154,7 @@ class VersionedHMDataObjectExtension extends DataExtension {
 		$has_many = $this->owner->config()->get('has_many');
 		if($has_many){
 			foreach($has_many as $key => $value){
-				if($value::has_extension('VersionDataObjectExtension')) {
+				if($value::has_extension('VersionedHMDataObjectExtension')) {
 					$relationship = $this->owner->getComponents($key);
 					if($relationship) {
 						foreach($relationship as $field) {

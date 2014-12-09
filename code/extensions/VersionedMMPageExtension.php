@@ -62,6 +62,11 @@ class VersionedMMPageExtension extends DataExtension {
 		
 		foreach($ManyMany as $componentName => $ManyManyClassName) {
 			
+			if( ! $ManyManyClassName::has_extension('VersionedMMBelongsDataObjectExtension')){
+				continue;
+			}
+			
+			//e.g.  'Slide',   'Page',         'SlideID',     'PageID',        'Page_Slides'
 			list($parentClass, $componentClass, $parentField, $componentField, $StageManyManyTable) = $this->owner->many_many($componentName);
 			
 			//check if the many_many component has Live table.
