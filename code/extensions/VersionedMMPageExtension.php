@@ -75,7 +75,15 @@ class VersionedMMPageExtension extends DataExtension {
 			if(in_array($LiveManyManyTable, $tableList)){
 				//get all stage data
 				$StageWhere = ($CopyWholeTable === true) ?  '1' : "\"{$parentField}\" = {$this->owner->ID}";
-				$StageData = DB::query("SELECT * FROM \"{$StageManyManyTable}\" WHERE {$StageWhere}");
+				
+				$allowColumns = array('ID', $componentField, $parentField);
+				$extraColumns = $this->owner->many_many_extraFields($componentName);
+				if(count($extraColumns)){
+					$allowColumns = array_merge($allowColumns, array_keys($extraColumns));
+				}
+				$StageColumnSelect = '"' . implode('","', $allowColumns) . '"';
+				
+				$StageData = DB::query("SELECT {$StageColumnSelect} FROM \"{$StageManyManyTable}\" WHERE {$StageWhere}");
 				
 				//delete live data.
 				if($CopyWholeTable === true){
