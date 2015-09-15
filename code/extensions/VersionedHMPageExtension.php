@@ -25,6 +25,13 @@ class VersionedHMPageExtension extends DataExtension{
 		if(!$rollback && $modifiedOnStage && !$this->owner->IsDeletedFromStage){
 			if($this->owner->isPublished() && $this->owner->canEdit())	{
 				// "rollback"
+				$actionMenus = $actions->fieldByName('ActionMenus');
+				if( !$actionMenus ){ // make sure there is a menu to append to
+				    $actionMenus = TabSet::create('ActionMenus');
+				    $form = $actions->first()->getForm();
+				    $actionMenus->setForm($form);
+				    $actions->push($actionMenus);
+				}
 				$actions->addFieldToTab('ActionMenus.MoreOptions',
 					FormAction::create('rollback', _t('SiteTree.BUTTONCANCELDRAFT', 'Cancel draft changes'), 'delete')
 						->setDescription(_t('SiteTree.BUTTONCANCELDRAFTDESC', 'Delete your draft and revert to the currently published page'))
