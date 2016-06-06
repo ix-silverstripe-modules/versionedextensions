@@ -50,7 +50,8 @@ class VersionedHMPageExtension extends DataExtension{
 					if($value::has_extension('VersionedHMDataObjectExtension')) {
 						$relationship 	= $this->owner->getComponents($key);
 						$foreignKey 	= $relationship->getForeignKey();
-						$live = Versioned::get_by_stage($value, "Live", "\"$value\".\"$foreignKey\" = " . $this->owner->ID );
+						$remoteClass 	= $this->getForeignKeyRemoteClass($value, $foreignKey);
+						$live 			= Versioned::get_by_stage($value, "Live", "\"$remoteClass\".\"$foreignKey\" = " . $this->owner->ID );
 				
 						if($live) {
 							foreach($live as $field) {
@@ -182,5 +183,16 @@ class VersionedHMPageExtension extends DataExtension{
 			return isset($matches[0]) ? $matches[0] : $value;
 		}
 		return $value;
+	}
+	
+	public function getForeignKeyRemoteClass($remoteClass, $foreignKey){
+		$remoteRelations = Config::inst()->get($remoteClass, 'has_one');
+
+		foreach($remoteRelations as $key => $value){
+			if($key . 'ID' == $foreignKey){
+				return $value;
+			}
+		}
+		return $remoteClass;
 	}
 }
