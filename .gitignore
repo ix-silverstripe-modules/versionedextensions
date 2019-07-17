@@ -1,0 +1,12 @@
+##### ignore everything...
+/*
+
+##### ...but
+!/.gitignore
+!/composer.json
+!/composer.lock
+!/README.md
+
+##### modules
+!/src
+!/_config

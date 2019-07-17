@@ -1,4 +1,15 @@
-<?php 
+<?php
+
+namespace Internetrix\VersionedExtensions\Extensions;
+
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\TabSet;
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Versioned\Versioned;
+use Page;
+
 /**
  * Adds all the necesary functions to Page.php.
  * When an action is performed on a page i.e publish, unpublish etc, this extension will check the has_many relationships defined 
@@ -9,21 +20,21 @@
  * @package versionedextensions
  *
  */
-class VersionedHMPageExtension extends DataExtension{
-
-	
-	function updateCMSActions(FieldList $actions){
+class VersionedHMPageExtension extends DataExtension
+{
+	function updateCMSActions(FieldList $actions)
+    {
 		$publish 		 = $actions->dataFieldByName('action_publish');
 		$deleteDraft 	 = $actions->dataFieldByName('action_delete') ? 'action_delete' : null;
 		$rollback 		 = $actions->dataFieldByName('action_rollback');
 		$modifiedOnStage = $this->owner->getIsModifiedOnStage();
 		
-		if($modifiedOnStage && $publish){
+		if ($modifiedOnStage && $publish) {
 			$publish->addExtraClass('ss-ui-alternate');
 		}
 		
-		if(!$rollback && $modifiedOnStage && !$this->owner->IsDeletedFromStage){
-			if($this->owner->isPublished() && $this->owner->canEdit())	{
+		if (!$rollback && $modifiedOnStage && !$this->owner->IsDeletedFromStage) {
+			if ($this->owner->isPublished() && $this->owner->canEdit())	{
 				// "rollback"
 				$actionMenus = $actions->fieldByName('ActionMenus');
 				if( !$actionMenus ){ // make sure there is a menu to append to
@@ -40,26 +51,27 @@ class VersionedHMPageExtension extends DataExtension{
 		}
 	}
 	
-	public function onAfterPublish(){
-		if($this->owner->ID){
+	public function onAfterPublish()
+    {
+		if ($this->owner->ID) {
 			// remove fields on the live table which could have been orphaned.
 			$has_many = $this->owner->config()->get('has_many');
-			if($has_many){
-				foreach($has_many as $key => $value){
+			if ($has_many) {
+				foreach ($has_many as $key => $value) {
 					$value = $this->getClassFromValue($value);
-					if($value::has_extension('VersionedHMDataObjectExtension')) {
+					if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 						$relationship 	= $this->owner->getComponents($key);
 						$foreignKey 	= $relationship->getForeignKey();
 						$live 			= Versioned::get_by_stage($value, "Live", "\"$foreignKey\" = " . $this->owner->ID );
 				
-						if($live) {
+						if ($live) {
 							foreach($live as $field) {
 								$field->doDeleteFromStage('Live');
 							}
 						}
 				
 						// publish the draft pages
-						if($relationship) {
+						if ($relationship) {
 							foreach($relationship as $field) {
 								$field->doPublish('Stage', 'Live');
 							}
@@ -70,15 +82,16 @@ class VersionedHMPageExtension extends DataExtension{
 		}
 	}
 	
-	public function onBeforeUnpublish(){
+	public function onBeforeUnpublish()
+    {
 		$has_many = $this->owner->config()->get('has_many');
-		if($has_many){
-			foreach($has_many as $key => $value){
+		if ($has_many) {
+			foreach ($has_many as $key => $value) {
 				$value = $this->getClassFromValue($value);
-				if($value::has_extension('VersionedHMDataObjectExtension')) {
+				if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 					$relationship = $this->owner->getComponents($key);
-					if($relationship) {
-						foreach($relationship as $field) {
+					if ($relationship) {
+						foreach ($relationship as $field) {
 							$field->doDeleteFromStage('Live');
 						}
 					}
@@ -87,15 +100,16 @@ class VersionedHMPageExtension extends DataExtension{
 		}
 	}
 	
-	public function onBeforeRevertToLive(){
+	public function onBeforeRevertToLive()
+    {
 		$has_many = $this->owner->config()->get('has_many');
-		if($has_many){
+		if ($has_many) {
 			foreach($has_many as $key => $value){
 				$value = $this->getClassFromValue($value);
-				if($value::has_extension('VersionedHMDataObjectExtension')) {
+				if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 					$relationship = $this->owner->getComponents($key);
-					if($relationship) {
-						foreach($relationship as $field) {
+					if ($relationship) {
+						foreach ($relationship as $field) {
 							$field->doRevertToLive();
 							$field->delete();
 						}
@@ -108,13 +122,13 @@ class VersionedHMPageExtension extends DataExtension{
 		Versioned::set_reading_mode("Stage.Live");
 		//move from live to staging
 		$has_many = $this->owner->config()->get('has_many');
-		if($has_many){
-			foreach($has_many as $key => $value){
+		if ($has_many) {
+			foreach ($has_many as $key => $value) {
 				$value = $this->getClassFromValue($value);
-				if($value::has_extension('VersionedHMDataObjectExtension')) {
+				if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 					$relationship = $this->owner->getComponents($key);
-					if($relationship) {
-						foreach($relationship as $field) {
+					if ($relationship) {
+						foreach ($relationship as $field) {
 							$field->publish("Live", "Stage", false);
 							$field->writeWithoutVersion();
 						}
@@ -126,16 +140,16 @@ class VersionedHMPageExtension extends DataExtension{
 		Versioned::set_reading_mode($oldMode);
 	}
 	
-	public function onAfterDuplicate(Page $page){
-		
+	public function onAfterDuplicate(Page $page)
+    {
 		$has_many = $this->owner->config()->get('has_many');
-		if($has_many){
-			foreach($has_many as $key => $value){
+		if ($has_many) {
+			foreach ($has_many as $key => $value) {
 				$value = $this->getClassFromValue($value);
-				if($value::has_extension('VersionedHMDataObjectExtension')) {
+				if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 					$relationship = $this->owner->getComponents($key);
-					if($relationship) {
-						foreach($relationship as $field) {
+					if ($relationship) {
+						foreach ($relationship as $field) {
 							$field->doDuplicate();
 							$newField = $field->duplicate($page);
 							$newField->ParentID = $page->ID;
@@ -147,17 +161,18 @@ class VersionedHMPageExtension extends DataExtension{
 		}
 	}
 	
-	public function getIsModifiedOnStage(&$isModified){
-		if(!$isModified) {
+	public function getIsModifiedOnStage(&$isModified)
+    {
+		if (!$isModified) {
 			$has_many = $this->owner->config()->get('has_many');
-			if($has_many){
-				foreach($has_many as $key => $value){
+			if ($has_many) {
+				foreach ($has_many as $key => $value) {
 					$value = $this->getClassFromValue($value);
-					if($value::has_extension('VersionedHMDataObjectExtension')) {
+					if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 						$relationship = $this->owner->getComponents($key);
-						if($relationship) {
-							foreach($relationship as $field) {
-								if($field->getIsModifiedOnStage()) {
+						if ($relationship) {
+							foreach ($relationship as $field) {
+								if ($field->getIsModifiedOnStage()) {
 									$isModified = true;
 									break;
 								}
@@ -170,25 +185,28 @@ class VersionedHMPageExtension extends DataExtension{
 		return $isModified;
 	}
 	
-	public function onAfterRollback($version){
-		if($version == "Live"){
+	public function onAfterRollback($version)
+    {
+		if ($version == "Live") {
 			$this->owner->doRevertToLive(); //this will eventually call onBeforeRevertToLive() (see above)
 		}
 	}
 	
-	public function getClassFromValue($value){
-		if(stripos($value, ".") !== false){
+	public function getClassFromValue($value)
+    {
+		if (stripos($value, ".") !== false) {
 			$matches = explode(".", $value);
 			return isset($matches[0]) ? $matches[0] : $value;
 		}
 		return $value;
 	}
 	
-	public function getForeignKeyRemoteClass($remoteClass, $foreignKey){
+	public function getForeignKeyRemoteClass($remoteClass, $foreignKey)
+    {
 		$remoteRelations = Config::inst()->get($remoteClass, 'has_one');
 
-		foreach($remoteRelations as $key => $value){
-			if($key . 'ID' == $foreignKey){
+		foreach ($remoteRelations as $key => $value) {
+			if ($key . 'ID' == $foreignKey) {
 				return $value;
 			}
 		}

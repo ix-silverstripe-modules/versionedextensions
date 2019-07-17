@@ -3,4 +3,4 @@ Name: versionedextensions
 ---
 Page:
   extensions:
-    - 'VersionedHMPageExtension'
+    - 'Internetrix\VersionedExtensions\Extensions\VersionedHMPageExtension'

@@ -1,46 +1,53 @@
 <?php
+
+namespace Internetrix\VersionedExtensions\Extensions;
+
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Versioned\Versioned;
+use Page;
+
 /**
  * 
  * @author guy.watson@internetrix.com.au
  * @package versionedextensions
  * 
  */
-class VersionedHMDataObjectExtension extends DataExtension {
+class VersionedHMDataObjectExtension extends DataExtension
+{
 	/**
 	 * Publish this Form Field to the live site
 	 *
 	 * Wrapper for the {@link Versioned} publish function
 	 */
-	public function doPublish($fromStage, $toStage, $createNewVersion = false) {
+	public function doPublish($fromStage, $toStage, $createNewVersion = false)
+    {
 		$this->owner->publish($fromStage, $toStage, $createNewVersion);
 		
 		//the dataobject may also have its own versioned has_many relationships
 		$has_many = $this->owner->config()->get('has_many');
-		if($has_many){
-			foreach($has_many as $key => $value){
+		if ($has_many) {
+			foreach ($has_many as $key => $value) {
 				$value = $this->getClassFromValue($value);
-				if($value::has_extension('VersionedHMDataObjectExtension')) {
+				if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 					$relationship 	= $this->owner->getComponents($key);
 					$foreignKey 	= $relationship->getForeignKey();
 					$live = Versioned::get_by_stage($value, "Live", "\"$value\".\"$foreignKey\" = " . $this->owner->ID );
 						
-					if($live) {
-						foreach($live as $field) {
+					if ($live) {
+						foreach ($live as $field) {
 							$field->doDeleteFromStage('Live');
 						}
 					}
 						
 					// publish the draft pages
-					if($relationship) {
-						foreach($relationship as $field) {
+					if ($relationship) {
+						foreach ($relationship as $field) {
 							$field->doPublish('Stage', 'Live');
 						}
 					}
 				}
-				
 			}
 		}
-		
 	}
 	
 	/**
@@ -48,17 +55,18 @@ class VersionedHMDataObjectExtension extends DataExtension {
 	 *
 	 * Wrapper for the {@link Versioned} deleteFromStage function
 	 */
-	public function doDeleteFromStage($stage) {
+	public function doDeleteFromStage($stage)
+    {
 		$this->owner->deleteFromStage($stage);
 		
 		$has_many = $this->owner->config()->get('has_many');
-		if($has_many){
-			foreach($has_many as $key => $value){
+		if ($has_many) {
+			foreach ($has_many as $key => $value) {
 				$value = $this->getClassFromValue($value);
-				if($value::has_extension('VersionedHMDataObjectExtension')) {
+				if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 					$relationship = $this->owner->getComponents($key);
-					if($relationship) {
-						foreach($relationship as $field) {
+					if ($relationship) {
+						foreach ($relationship as $field) {
 							$field->doDeleteFromStage('Live');
 						}
 					}
@@ -70,7 +78,8 @@ class VersionedHMDataObjectExtension extends DataExtension {
 	/**
 	 * checks wether record is new, copied from Sitetree
 	 */
-	function isNew() {
+	function isNew()
+    {
 		if(empty($this->owner->ID)) return true;
 	
 		if(is_numeric($this->owner->ID)) return false;
@@ -82,25 +91,26 @@ class VersionedHMDataObjectExtension extends DataExtension {
 	 * checks if records is changed on stage
 	 * @return boolean
 	 */
-	public function getIsModifiedOnStage() {
+	public function getIsModifiedOnStage()
+    {
 		// new unsaved fields could be never be published
-		if($this->owner->isNew()) return false;
+		if ($this->owner->isNew()) return false;
 	
 		$stageVersion = Versioned::get_versionnumber_by_stage($this->owner->ClassName, 'Stage', $this->owner->ID);
 		$liveVersion =	Versioned::get_versionnumber_by_stage($this->owner->ClassName, 'Live', $this->owner->ID);
 		
 		$isModified = ($stageVersion && $stageVersion != $liveVersion);
 		
-		if(!$isModified){
+		if (!$isModified) {
 			$has_many = $this->owner->config()->get('has_many');
-			if($has_many){
-				foreach($has_many as $key => $value){
+			if ($has_many) {
+				foreach ($has_many as $key => $value) {
 					$value = $this->getClassFromValue($value);
-					if($value::has_extension('VersionedHMDataObjectExtension')) {
+					if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 						$relationship = $this->owner->getComponents($key);
-						if($relationship) {
-							foreach($relationship as $field) {
-								if($field->getIsModifiedOnStage()) {
+						if ($relationship) {
+							foreach ($relationship as $field) {
+								if ($field->getIsModifiedOnStage()) {
 									$isModified = true;
 									break;
 								}
@@ -114,16 +124,16 @@ class VersionedHMDataObjectExtension extends DataExtension {
 		return $isModified;
 	}
 	
-	public function doRevertToLive(){
-		
+	public function doRevertToLive()
+    {
 		$has_many = $this->owner->config()->get('has_many');
-		if($has_many){
-			foreach($has_many as $key => $value){
+		if ($has_many) {
+			foreach ($has_many as $key => $value) {
 				$value = $this->getClassFromValue($value);
-				if($value::has_extension('VersionedHMDataObjectExtension')) {
+				if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 					$relationship = $this->owner->getComponents($key);
-					if($relationship) {
-						foreach($relationship as $field) {
+					if ($relationship) {
+						foreach ($relationship as $field) {
 							$field->doRevertToLive();
 							$field->delete();
 						}
@@ -135,13 +145,13 @@ class VersionedHMDataObjectExtension extends DataExtension {
 		$oldMode = Versioned::get_reading_mode();
 		Versioned::set_reading_mode("Stage.Live");
 		//move from live to staging
-		if($has_many){
-			foreach($has_many as $key => $value){
+		if ($has_many) {
+			foreach ($has_many as $key => $value) {
 				$value = $this->getClassFromValue($value);
-				if($value::has_extension('VersionedHMDataObjectExtension')) {
+				if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 					$relationship = $this->owner->getComponents($key);
-					if($relationship) {
-						foreach($relationship as $field) {
+					if ($relationship) {
+						foreach ($relationship as $field) {
 							$field->publish("Live", "Stage", false);
 							$field->writeWithoutVersion();
 						}
@@ -151,19 +161,18 @@ class VersionedHMDataObjectExtension extends DataExtension {
 		}
 		//now delete the live objects and move what is one stage to live.
 		Versioned::set_reading_mode($oldMode);
-		
 	}
 	
-	public function doDuplicate(Page $page){
-		
+	public function doDuplicate(Page $page)
+    {
 		$has_many = $this->owner->config()->get('has_many');
-		if($has_many){
-			foreach($has_many as $key => $value){
+		if ($has_many) {
+			foreach ($has_many as $key => $value) {
 				$value = $this->getClassFromValue($value);
-				if($value::has_extension('VersionedHMDataObjectExtension')) {
+				if ($value::has_extension(VersionedHMDataObjectExtension::class)) {
 					$relationship = $this->owner->getComponents($key);
-					if($relationship) {
-						foreach($relationship as $field) {
+					if ($relationship) {
+						foreach ($relationship as $field) {
 							$field->doDuplicate($page);
 						}
 					}
@@ -176,29 +185,30 @@ class VersionedHMDataObjectExtension extends DataExtension {
 		$newField->write();
 	}
 	
-	public function updateBetterButtonsActions(FieldList $actions){
-		
-		foreach($actions as $a) {
-			if($a instanceof BetterButtonFrontendLinksAction){
-				$actions->remove($a);
-			}
-		}
-
-		$actions->removeByName('BetterButtonFrontendLinksAction');
-		$actions->removeByName('frontend-links');
-		$actions->removeByName('action_save');
-		$actions->removeByName('action_publish');
-		$actions->removeByName('action_rollback');
-		$actions->removeByName('action_unpublish');
-		$actions->removeByName('action_doDelete');
-		
-		$actions->push(BetterButton_Save::create());
-		$actions->push(BetterButton_SaveAndClose::create());
-		$actions->push(BetterButton_DeleteDraft::create());
-	}
+//	public function updateBetterButtonsActions(FieldList $actions)
+//    {
+//		foreach ($actions as $a) {
+//			if ($a instanceof BetterButtonFrontendLinksAction) {
+//				$actions->remove($a);
+//			}
+//		}
+//
+//		$actions->removeByName('BetterButtonFrontendLinksAction');
+//		$actions->removeByName('frontend-links');
+//		$actions->removeByName('action_save');
+//		$actions->removeByName('action_publish');
+//		$actions->removeByName('action_rollback');
+//		$actions->removeByName('action_unpublish');
+//		$actions->removeByName('action_doDelete');
+//
+//		$actions->push(BetterButton_Save::create());
+//		$actions->push(BetterButton_SaveAndClose::create());
+//		$actions->push(BetterButton_DeleteDraft::create());
+//	}
 	
-	public function getClassFromValue($value){
-		if(stripos($value, ".") !== false){
+	public function getClassFromValue($value)
+    {
+		if (stripos($value, ".") !== false) {
 			$matches = explode(".", $value);
 			return isset($matches[0]) ? $matches[0] : $value;
 		}
