@@ -91,7 +91,7 @@ class VersionedHMDataObjectExtension extends DataExtension
 	 * checks if records is changed on stage
 	 * @return boolean
 	 */
-	public function getIsModifiedOnStage()
+	public function isModifiedOnDraft()
     {
 		// new unsaved fields could be never be published
 		if ($this->owner->isNew()) return false;
@@ -110,7 +110,7 @@ class VersionedHMDataObjectExtension extends DataExtension
 						$relationship = $this->owner->getComponents($key);
 						if ($relationship) {
 							foreach ($relationship as $field) {
-								if ($field->getIsModifiedOnStage()) {
+								if ($field->isModifiedOnDraft()) {
 									$isModified = true;
 									break;
 								}

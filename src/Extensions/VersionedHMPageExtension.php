@@ -27,7 +27,7 @@ class VersionedHMPageExtension extends DataExtension
 		$publish 		 = $actions->dataFieldByName('action_publish');
 		$deleteDraft 	 = $actions->dataFieldByName('action_delete') ? 'action_delete' : null;
 		$rollback 		 = $actions->dataFieldByName('action_rollback');
-		$modifiedOnStage = $this->owner->getIsModifiedOnStage();
+		$modifiedOnStage = $this->owner->isModifiedOnDraft();
 		
 		if ($modifiedOnStage && $publish) {
 			$publish->addExtraClass('ss-ui-alternate');
@@ -161,7 +161,7 @@ class VersionedHMPageExtension extends DataExtension
 		}
 	}
 	
-	public function getIsModifiedOnStage(&$isModified)
+	public function isModifiedOnDraft(&$isModified = false)
     {
 		if (!$isModified) {
 			$has_many = $this->owner->config()->get('has_many');
@@ -172,7 +172,7 @@ class VersionedHMPageExtension extends DataExtension
 						$relationship = $this->owner->getComponents($key);
 						if ($relationship) {
 							foreach ($relationship as $field) {
-								if ($field->getIsModifiedOnStage()) {
+								if ($field->isModifiedOnDraft()) {
 									$isModified = true;
 									break;
 								}
